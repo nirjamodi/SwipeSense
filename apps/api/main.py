@@ -1,8 +1,20 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+
 app = FastAPI(title="SwipeSense API")
 from fastapi.middleware.cors import CORSMiddleware
+app = FastAPI(title="SwipeSense API")
+
+MONGO_URI = os.getenv("MONGO_DB_URI")
+MONGO_DB = os.getenv("MONGO_DB_NAME", "creditCards")
+MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "cards")
+
+mongo_client = AsyncIOMotorClient(MONGO_URI) if MONGO_URI else None
 
 app.add_middleware(
     CORSMiddleware,
@@ -27,7 +39,18 @@ class Transaction(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok", "project": "SwipeSense"}
+@app.get("/cards")
+async def get_cards():
+    if not mongo_client:
+        return {"error": "MONGO_DB_URI not set"}
 
+    coll = mongo_client[MONGO_DB][MONGO_COLLECTION]
+    docs = await coll.find({}).to_list(length=50)
+
+    for d in docs:
+        d["_id"] = str(d["_id"])
+
+    return docs
 
 @app.post("/recommend/card")
 def recommend_card(user: UserProfile):
