@@ -3,18 +3,16 @@ __pycache__/
 *.pyc
 .venv/
 venv/
-.env
 
-# Node / Next.js
+# Node
 node_modules/
 .next/
-dist/
-build/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# ML artifacts & generated data
+# ML artifacts (later)
 apps/api/artifacts/
-data/processed/*.csv
+data/processed/
+.env
