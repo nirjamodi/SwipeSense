@@ -1,8 +1,20 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+import os
+from motor.motor_asyncio import AsyncIOMotorClient
+
 app = FastAPI(title="SwipeSense API")
 from fastapi.middleware.cors import CORSMiddleware
+app = FastAPI(title="SwipeSense API")
+
+MONGO_URI = os.getenv("MONGO_DB_URI")
+MONGO_DB = os.getenv("MONGO_DB_NAME", "creditCards")
+MONGO_COLLECTION = os.getenv("MONGO_COLLECTION", "cards")
+
+mongo_client = AsyncIOMotorClient(MONGO_URI) if MONGO_URI else None
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,16 +41,6 @@ class Transaction(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok", "project": "SwipeSense"}
-
-from fastapi import HTTPException
-
-@app.get("/db/health")
-async def db_health():
-    try:
-        await db.command("ping")
-        return {"db": "ok"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/recommend/card")
