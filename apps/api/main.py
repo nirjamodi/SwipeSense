@@ -12,6 +12,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from .db import db
+
 # ---------- Models ----------
 class UserProfile(BaseModel):
     is_student: bool
@@ -27,6 +29,16 @@ class Transaction(BaseModel):
 @app.get("/health")
 def health():
     return {"status": "ok", "project": "SwipeSense"}
+
+from fastapi import HTTPException
+
+@app.get("/db/health")
+async def db_health():
+    try:
+        await db.command("ping")
+        return {"db": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/recommend/card")
@@ -60,3 +72,4 @@ def recommend_for_transaction(tx: Transaction):
             "use_card": "Avion Points Card",
             "reason": "High-value purchase earns more points"
         }
+    
